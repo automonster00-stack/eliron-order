@@ -498,7 +498,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 24 24">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11zm-5-9h-3v2h3v2h-3v2h3a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2z"/>
       </svg>
-      הורד PDF
+      הדפס / שמור PDF
     </button>
   </div>
 </div>
@@ -746,7 +746,73 @@ function sendWhatsApp() {
 
 // --- PDF (jsPDF client-side) ---
 function downloadPDF() {
-  window.print();
+  const name   = document.getElementById('f-name').value.trim()   || 'לא צוין';
+  const guests = document.getElementById('f-guests').value.trim() || '—';
+  const date   = document.getElementById('f-date').value.trim()   || '—';
+  const notes  = document.getElementById('f-notes').value.trim();
+  const today  = new Date().toLocaleDateString('he-IL');
+
+  // Build salads list
+  const saladLines = Object.entries(state.salads)
+    .map(([n,q]) => `<tr><td>${n}</td><td class="qty">×${q}</td></tr>`).join('');
+  const mainLines = Object.entries(state.mains)
+    .map(([n,q]) => `<tr><td>${n}</td><td class="qty">×${q}</td></tr>`).join('');
+  const sidesLines = Object.entries({...state.sides, ...state.rice})
+    .map(([n,q]) => `<tr><td>${n}</td><td class="qty">×${q}</td></tr>`).join('');
+
+  const printHtml = `<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<title>הזמנה - ${name}</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Arial, 'Segoe UI', sans-serif; direction:rtl; color:#222; padding:20px; }
+  h1 { color:#8a6010; font-size:28px; text-align:center; margin-bottom:4px; }
+  .sub { text-align:center; color:#a07830; font-size:13px; margin-bottom:16px; }
+  .divider { border:none; border-top:2px solid #c9a030; margin:12px 0; }
+  .meta-box { background:#faf5e4; border:1px solid #d4b870; border-radius:6px; padding:12px 16px; margin-bottom:16px; }
+  .meta-box table { width:100%; }
+  .meta-box td { padding:3px 6px; font-size:13px; }
+  .meta-box td:first-child { font-weight:bold; color:#6b4a00; width:100px; }
+  h2 { background:#f5e8c0; color:#5a3800; padding:6px 10px; font-size:14px; margin:14px 0 0; border-right:4px solid #c9a030; }
+  table.items { width:100%; border-collapse:collapse; }
+  table.items td { padding:5px 10px; font-size:13px; border-bottom:1px solid #eee; }
+  table.items .qty { text-align:left; color:#8a6010; font-weight:bold; }
+  .notes-box { background:#faf5e4; border:1px solid #d4b870; border-radius:4px; padding:10px; margin-top:14px; font-size:13px; }
+  .footer { text-align:center; color:#aaa; font-size:11px; margin-top:20px; padding-top:10px; border-top:1px solid #eee; }
+  @media print {
+    body { padding:10px; }
+    button { display:none; }
+  }
+</style>
+</head>
+<body>
+<h1>Eliron</h1>
+<div class="sub">Art &amp; Taste · Where Culinary Art Meets Perfection</div>
+<hr class="divider">
+<div class="meta-box">
+  <table>
+    <tr><td>שם:</td><td>${name}</td><td>תאריך אירוע:</td><td>${date}</td></tr>
+    <tr><td>סועדים:</td><td>${guests}</td><td>תאריך הזמנה:</td><td>${today}</td></tr>
+  </table>
+</div>
+${saladLines ? `<h2>🥗 סלטים</h2><table class="items">${saladLines}</table>` : ''}
+${mainLines  ? `<h2>🍗 מנות עיקריות</h2><table class="items">${mainLines}</table>` : ''}
+${sidesLines ? `<h2>🔥 תוספות</h2><table class="items">${sidesLines}</table>` : ''}
+${notes ? `<div class="notes-box"><strong>הערות:</strong> ${notes}</div>` : ''}
+<div class="footer">Eliron Art &amp; Taste · 050-8671692 · הוזמן דרך הטופס הדיגיטלי</div>
+<script>setTimeout(() => { window.print(); }, 400);<\/script>
+</body>
+</html>`;
+
+  const w = window.open('', '_blank', 'width=700,height=900');
+  if (!w) {
+    alert('אנא אפשר חלונות קופצים עבור האתר הזה (pop-up) ונסה שוב.');
+    return;
+  }
+  w.document.write(printHtml);
+  w.document.close();
 }
 
 
