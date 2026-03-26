@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eliron Art & Taste – הזמנה</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0d0d0d;
+      color: #f5e6c8;
+      font-family: -apple-system, 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      direction: rtl;
+    }
+
+    header {
+      background: linear-gradient(180deg, #1a1100 0%, #0d0d0d 100%);
+      border-bottom: 1px solid #a07830;
+      text-align: center;
+      padding: 30px 20px 24px;
+    }
+
+    .logo-text {
+      font-size: 42px;
+      font-style: italic;
+      color: #d4a842;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 12px rgba(212,168,66,0.4);
+      font-weight: 300;
+    }
+
+    .logo-sub {
+      font-size: 11px;
+      letter-spacing: 5px;
+      color: #a07830;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .tagline {
+      font-size: 12px;
+      font-style: italic;
+      color: #7a5a20;
+      margin-top: 6px;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 20px 16px 80px;
+    }
+
+    .note {
+      background: rgba(160,120,48,0.1);
+      border: 1px solid rgba(160,120,48,0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #c9a55a;
+      text-align: center;
+      margin: 16px 0 24px;
+    }
+
+    .note span { display: block; margin-bottom: 4px; }
+
+    section {
+      margin-bottom: 28px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to left, transparent, #a07830, transparent);
+    }
+
+    .section-title {
+      text-align: center;
+    }
+
+    .section-title h2 {
+      font-size: 18px;
+      color: #d4a842;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .section-title p {
+      font-size: 12px;
+      color: #a07830;
+      margin-top: 2px;
+    }
+
+    .items-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(160,120,48,0.2);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .item.selected {
+      background: rgba(160,120,48,0.15);
+      border-color: #d4a842;
+    }
+
+    .item-name {
+      font-size: 14px;
+      color: #f0ddb0;
+      flex: 1;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .qty-control {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .qty-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid rgba(160,120,48,0.5);
+      background: rgba(160,120,48,0.1);
+      color: #d4a842;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .qty-btn:hover {
+      background: rgba(160,120,48,0.3);
+      border-color: #d4a842;
+    }
+
+    .qty-num {
+      font-size: 15px;
+      font-weight: 700;
+      color: #d4a842;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    /* Main course — single select */
+    .main-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(160,120,48,0.2);
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .main-item.selected {
+      background: rgba(160,120,48,0.18);
+      border-color: #d4a842;
+    }
+
+    .main-radio {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #a07830;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .main-item.selected .main-radio {
+      border-color: #d4a842;
+      background: #d4a842;
+    }
+
+    .main-item.selected .main-radio::after {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #0d0d0d;
+    }
+
+    .main-name {
+      font-size: 15px;
+      color: #f0ddb0;
+    }
+
+    .items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: linear-gradient(to left, transparent, #a07830 30%, #a07830 70%, transparent);
+      margin: 6px 0 20px;
+      opacity: 0.4;
+    }
+
+    /* Customer fields */
+    .fields {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .field-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      color: #a07830;
+      font-weight: 500;
+    }
+
+    input, textarea {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(160,120,48,0.3);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: #f5e6c8;
+      font-size: 15px;
+      font-family: inherit;
+      direction: rtl;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #d4a842;
+    }
+
+    textarea { resize: vertical; min-height: 70px; }
+
+    /* Summary */
+    .summary {
+      background: rgba(160,120,48,0.08);
+      border: 1px solid rgba(160,120,48,0.3);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 24px;
+      min-height: 60px;
+    }
+
+    .summary h4 {
+      font-size: 13px;
+      color: #a07830;
+      margin-bottom: 10px;
+    }
+
+    #order-preview {
+      font-size: 13px;
+      color: #c9a55a;
+      line-height: 1.8;
+      white-space: pre-line;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      margin-top: 20px;
+      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 6px 24px rgba(37,211,102,0.3);
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(37,211,102,0.45);
+    }
+
+    .footer {
+      text-align: center;
+      padding: 30px 20px;
+      font-size: 12px;
+      color: #5a4020;
+    }
+
+    @media (max-width: 420px) {
+      .items-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-text">Eliron</div>
+  <div class="logo-sub">Art &amp; Taste</div>
+  <div class="tagline">Where Culinary Art Meets Perfection</div>
+</header>
+
+<div class="container">
+  <div class="note">
+    <span>✦ כל מנה מגיעה עם לחמנייה ✦</span>
+    <span>✦ כל המנות מגיעות מחולקות כבר להגשה ✦</span>
+  </div>
+
+  <!-- SALADS -->
+  <section>
+    <div class="section-header">
+      <div class="section-line"></div>
+      <div class="section-title">
+        <h2>🥗 סלטים טריים · Freshest Salads</h2>
+        <p>בחירה – 6 סוגים</p>
+      </div>
+      <div class="section-line"></div>
+    </div>
+    <div class="items-grid" id="salads-grid">
+      <!-- JS renders items -->
+    </div>
+    <div id="salad-counter" style="text-align:center;margin-top:10px;font-size:13px;color:#a07830"></div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- MAIN COURSE -->
+  <section>
+    <div class="section-header">
+      <div class="section-line"></div>
+      <div class="section-title">
+        <h2>🍗 מנות עיקריות · Main Courses</h2>
+        <p>עיקרית לבחירה</p>
+      </div>
+      <div class="section-line"></div>
+    </div>
+    <div class="items-list" id="mains-list"></div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- HOT SIDES -->
+  <section>
+    <div class="section-header">
+      <div class="section-line"></div>
+      <div class="section-title">
+        <h2>🔥 תוספות חמות · Hot Sides</h2>
+        <p>בחירה – 2 סוגים</p>
+      </div>
+      <div class="section-line"></div>
+    </div>
+    <div class="items-grid" id="sides-grid"></div>
+    <div id="sides-counter" style="text-align:center;margin-top:10px;font-size:13px;color:#a07830"></div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- CUSTOMER DETAILS -->
+  <section>
+    <div class="section-header">
+      <div class="section-line"></div>
+      <div class="section-title">
+        <h2>📋 פרטי ההזמנה</h2>
+      </div>
+      <div class="section-line"></div>
+    </div>
+    <div class="fields">
+      <div class="field-row">
+        <label>שם מלא *</label>
+        <input type="text" id="f-name" placeholder="ישראל ישראלי">
+      </div>
+      <div class="field-row">
+        <label>מספר סועדים *</label>
+        <input type="number" id="f-guests" min="1" placeholder="לדוגמה: 8">
+      </div>
+      <div class="field-row">
+        <label>תאריך ושעת האירוע</label>
+        <input type="text" id="f-date" placeholder="26/3 בשעה 19:00">
+      </div>
+      <div class="field-row">
+        <label>הערות מיוחדות / אלרגיות</label>
+        <textarea id="f-notes" placeholder="ללא גלוטן, ללא בשר, וכד'..."></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORDER SUMMARY -->
+  <div class="summary">
+    <h4>✦ סיכום הזמנה ✦</h4>
+    <div id="order-preview">בחר פריטים כדי לראות סיכום...</div>
+  </div>
+
+  <button class="submit-btn" onclick="sendOrder()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="white">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+    שלח הזמנה ב-WhatsApp
+  </button>
+</div>
+
+<div class="footer">
+  A Culinary Masterpiece by Eliron &nbsp;|&nbsp; 050-8671692
+</div>
+
+<script>
+const SALADS = [
+  'כרוב לבן','כרוב סגול במיונז','חציל במיונז','גזר מרוקאי','קולסלאו','חומוס',
+  'כרוב סגול','מטבוחה ביתית','חציל בטחינה','גזר חריף','טחינה','סלק'
+];
+
+const MAINS = [
+  'כרעיים עוף בתיבול ביתי','דג אפוי בתנור','קבב עסיסי',
+  'פרגית עסיסית ברוטב','שניצל פריך','דג ברוטב מרוקאי'
+];
+
+const SIDES = [
+  'שעועית ירוקה מוקפצת','אורז לצותן / מוקפצת','זיתים ברוטב עשיר',
+  'תפוח אדמה סירות בתנור','אורז לבן / מתובל','אפונה וגזר ברוטב'
+];
+
+// State
+const state = {
+  salads: {},   // { name: qty }
+  main: null,
+  sides: {},    // { name: qty }
+};
+
+// Build quantity item
+function buildQtyItem(name, category, container) {
+  const div = document.createElement('div');
+  div.className = 'item';
+  div.id = `item-${category}-${name}`;
+
+  const nameEl = document.createElement('div');
+  nameEl.className = 'item-name';
+  nameEl.textContent = name;
+  nameEl.onclick = () => changeQty(category, name, 1);
+
+  const ctrl = document.createElement('div');
+  ctrl.className = 'qty-control';
+
+  const minus = document.createElement('button');
+  minus.className = 'qty-btn';
+  minus.textContent = '−';
+  minus.type = 'button';
+  minus.onclick = (e) => { e.stopPropagation(); changeQty(category, name, -1); };
+
+  const num = document.createElement('span');
+  num.className = 'qty-num';
+  num.id = `qty-${category}-${name}`;
+  num.textContent = '0';
+
+  const plus = document.createElement('button');
+  plus.className = 'qty-btn';
+  plus.textContent = '+';
+  plus.type = 'button';
+  plus.onclick = (e) => { e.stopPropagation(); changeQty(category, name, 1); };
+
+  ctrl.append(minus, num, plus);
+  div.append(nameEl, ctrl);
+  container.append(div);
+}
+
+function changeQty(category, name, delta) {
+  const obj = state[category];
+  const cur = obj[name] || 0;
+  const next = Math.max(0, cur + delta);
+  if (next === 0) delete obj[name]; else obj[name] = next;
+  document.getElementById(`qty-${category}-${name}`).textContent = next;
+  document.getElementById(`item-${category}-${name}`).classList.toggle('selected', next > 0);
+  updateCounters();
+  updatePreview();
+}
+
+// Build main-course radio item
+function buildMainItem(name, container) {
+  const div = document.createElement('div');
+  div.className = 'main-item';
+  div.onclick = () => selectMain(name);
+
+  const radio = document.createElement('div');
+  radio.className = 'main-radio';
+  radio.id = `radio-${name}`;
+
+  const label = document.createElement('div');
+  label.className = 'main-name';
+  label.textContent = name;
+
+  div.append(radio, label);
+  div.id = `main-${name}`;
+  container.append(div);
+}
+
+function selectMain(name) {
+  if (state.main) {
+    document.getElementById(`main-${state.main}`)?.classList.remove('selected');
+  }
+  state.main = name;
+  document.getElementById(`main-${name}`)?.classList.add('selected');
+  updatePreview();
+}
+
+// Init
+const saladsGrid = document.getElementById('salads-grid');
+SALADS.forEach(s => buildQtyItem(s, 'salads', saladsGrid));
+
+const mainsList = document.getElementById('mains-list');
+MAINS.forEach(m => buildMainItem(m, mainsList));
+
+const sidesGrid = document.getElementById('sides-grid');
+SIDES.forEach(s => buildQtyItem(s, 'sides', sidesGrid));
+
+// Counters
+function updateCounters() {
+  const sc = Object.values(state.salads).reduce((a,b) => a+b, 0);
+  const selS = Object.keys(state.salads).length;
+  const sd = Object.values(state.sides).reduce((a,b) => a+b, 0);
+  const selD = Object.keys(state.sides).length;
+
+  const sc_el = document.getElementById('salad-counter');
+  sc_el.textContent = `נבחרו ${selS}/6 סוגים (${sc} יח' סה"כ)`;
+  sc_el.style.color = selS >= 6 ? '#d4a842' : '#a07830';
+
+  const sd_el = document.getElementById('sides-counter');
+  sd_el.textContent = `נבחרו ${selD}/2 סוגים (${sd} יח' סה"כ)`;
+  sd_el.style.color = selD >= 2 ? '#d4a842' : '#a07830';
+}
+
+function updatePreview() {
+  const lines = [];
+  const name = document.getElementById('f-name').value.trim();
+  const guests = document.getElementById('f-guests').value.trim();
+  const date = document.getElementById('f-date').value.trim();
+
+  if (name) lines.push(`👤 שם: ${name}`);
+  if (guests) lines.push(`👥 סועדים: ${guests}`);
+  if (date) lines.push(`📅 תאריך: ${date}`);
+
+  const saladKeys = Object.keys(state.salads);
+  if (saladKeys.length) {
+    lines.push('');
+    lines.push('🥗 סלטים:');
+    saladKeys.forEach(k => lines.push(`  • ${k} ×${state.salads[k]}`));
+  }
+
+  if (state.main) {
+    lines.push('');
+    lines.push(`🍗 עיקרית: ${state.main}`);
+  }
+
+  const sideKeys = Object.keys(state.sides);
+  if (sideKeys.length) {
+    lines.push('');
+    lines.push('🔥 תוספות:');
+    sideKeys.forEach(k => lines.push(`  • ${k} ×${state.sides[k]}`));
+  }
+
+  document.getElementById('order-preview').textContent = lines.length ? lines.join('\n') : 'בחר פריטים כדי לראות סיכום...';
+}
+
+// Live update on field changes
+['f-name','f-guests','f-date','f-notes'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updatePreview);
+});
+
+// Send via WhatsApp
+function sendOrder() {
+  const name = document.getElementById('f-name').value.trim();
+  const guests = document.getElementById('f-guests').value.trim();
+  const date = document.getElementById('f-date').value.trim();
+  const notes = document.getElementById('f-notes').value.trim();
+
+  if (!name) { alert('נא להזין שם מלא'); return; }
+  if (!guests) { alert('נא להזין מספר סועדים'); return; }
+  if (!state.main) { alert('נא לבחור מנה עיקרית'); return; }
+
+  const lines = [
+    '🍽️ *הזמנה חדשה – Eliron Art & Taste*',
+    '',
+    `👤 שם: ${name}`,
+    `👥 סועדים: ${guests}`,
+  ];
+  if (date) lines.push(`📅 תאריך: ${date}`);
+
+  const saladKeys = Object.keys(state.salads);
+  if (saladKeys.length) {
+    lines.push('');
+    lines.push('🥗 *סלטים:*');
+    saladKeys.forEach(k => lines.push(`  • ${k} ×${state.salads[k]}`));
+  }
+
+  lines.push('');
+  lines.push(`🍗 *עיקרית:* ${state.main}`);
+
+  const sideKeys = Object.keys(state.sides);
+  if (sideKeys.length) {
+    lines.push('');
+    lines.push('🔥 *תוספות:*');
+    sideKeys.forEach(k => lines.push(`  • ${k} ×${state.sides[k]}`));
+  }
+
+  if (notes) {
+    lines.push('');
+    lines.push(`📝 *הערות:* ${notes}`);
+  }
+
+  const msg = encodeURIComponent(lines.join('\n'));
+  window.open(`https://wa.me/972523726767?text=${msg}`, '_blank');
+}
+
+updateCounters();
+</script>
+</body>
+</html>
