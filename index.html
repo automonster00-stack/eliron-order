@@ -712,7 +712,7 @@ function sendWhatsApp() {
 }
 
 // --- PDF ---
-function downloadPDF() {
+async function downloadPDF() {
   const name = document.getElementById('f-name').value.trim() || 'לא צוין';
   const guests = document.getElementById('f-guests').value.trim() || '—';
   const date = document.getElementById('f-date').value.trim() || '—';
@@ -740,54 +740,42 @@ function downloadPDF() {
     riceKeys.forEach(k => { tableRows += `<tr><td class="item-name-cell">${k}</td><td class="qty-cell">×${state.rice[k]}</td></tr>`; });
   }
 
-  // Use data URI so no popup blocker issues
-  const html = `<!DOCTYPE html>
-<html dir="rtl" lang="he">
-<head>
-<meta charset="UTF-8">
-<title>הזמנה – Eliron</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:Arial,Helvetica,sans-serif;direction:rtl;padding:32px;color:#222;background:#fff}
-  h1{color:#8a6010;font-style:italic;font-size:36px;margin-bottom:2px}
-  .sub{color:#a07830;font-size:11px;letter-spacing:4px;text-transform:uppercase;margin-bottom:6px}
-  .tagline{color:#c9a030;font-style:italic;font-size:12px;margin-bottom:24px}
-  .meta{background:#faf5e4;border:1px solid #d4b870;border-radius:8px;padding:12px 18px;margin-bottom:24px;font-size:14px;line-height:2.2}
-  table{width:100%;border-collapse:collapse;margin-bottom:24px;font-size:14px}
-  .cat-header{background:#f5e6c8;font-weight:700;padding:8px 12px;border-top:2px solid #d4b870;border-bottom:1px solid #d4b870}
-  .item-name-cell{padding:8px 12px;border-bottom:1px solid #f0e8d0}
-  .qty-cell{padding:8px 12px;text-align:center;font-weight:700;color:#8a6010;border-bottom:1px solid #f0e8d0;width:60px}
-  .notes-box{background:#faf5e4;border:1px solid #d4b870;border-radius:8px;padding:14px 18px;font-size:13px;line-height:1.8;margin-bottom:24px}
-  .footer{text-align:center;color:#aaa;font-size:11px;margin-top:20px;padding-top:12px;border-top:1px solid #eee}
-  @media print{
-    body{padding:20px}
-    .no-print{display:none}
-  }
-</style>
-</head>
-<body>
-<h1>Eliron</h1>
-<div class="sub">Art &amp; Taste</div>
-<div class="tagline">Where Culinary Art Meets Perfection</div>
-<div class="meta">
-  <strong>👤 שם:</strong> ${name}&nbsp;&nbsp;&nbsp;
-  <strong>👥 סועדים:</strong> ${guests}&nbsp;&nbsp;&nbsp;
-  <strong>📅 תאריך:</strong> ${date}
-</div>
-<table>${tableRows}</table>
-${notes ? `<div class="notes-box"><strong>📝 הערות:</strong><br>${notes}</div>` : ''}
-<div class="footer">Eliron Art &amp; Taste · 050-8671692 · הוזמן דרך הטופס הדיגיטלי · ${new Date().toLocaleDateString('he-IL')}</div>
-<div class="no-print" style="text-align:center;margin-top:28px">
-  <button onclick="window.print()" style="padding:12px 32px;background:#8a6010;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;font-family:Arial">🖨️ הדפס / שמור כ-PDF</button>
-</div>
-</body></html>`;
+  // Send to PDF server
+  const btn = document.querySelector('.pdf-btn');
+  const origText = btn.innerHTML;
+  btn.innerHTML = '⏳ מייצר PDF...';
+  btn.disabled = true;
 
-  // Write to data URI and open — avoids popup blocker, works on mobile too
-  const encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
-  const a = document.createElement('a');
-  a.href = encoded;
-  a.download = `eliron-order-${name || 'order'}.html`;
-  a.click();
+  const payload = {
+    name, guests, date, notes,
+    salads: state.salads,
+    mains:  state.mains,
+    sides:  state.sides,
+    rice:   state.rice
+  };
+
+  try {
+    const res = await fetch('http://72.61.177.100:18802/generate-pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error(`שגיאה ${res.status}`);
+
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `eliron-order-${name}.pdf`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  } catch (err) {
+    alert('שגיאה ביצירת ה-PDF: ' + err.message);
+  } finally {
+    btn.innerHTML = origText;
+    btn.disabled  = false;
+  }
 }
 
 updateCounters();
